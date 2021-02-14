@@ -13,14 +13,6 @@ class VAE(keras.Model):
         )
         self.kl_loss_tracker = keras.metrics.Mean(name="kl_loss")
     
-    @property
-    def metrics(self):
-        return [
-            self.total_loss_tracker,
-            self.reconstruction_loss_tracker,
-            self.kl_loss_tracker,
-        ]
-
     def train_step(self, data):
         with tf.GradientTape() as tape:
             z_mean, z_log_var, z = self.encoder(data)
@@ -52,7 +44,7 @@ class VAE(keras.Model):
         reconstruction_loss = tf.reduce_mean(
           keras.losses.binary_crossentropy(data, reconstruction)
         )
-        reconstruction_loss *= 128 * 128
+        reconstruction_loss *= 64 * 64
         kl_loss = 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
         kl_loss = tf.reduce_mean(kl_loss)
         kl_loss *= -0.5
@@ -69,7 +61,7 @@ class VAE(keras.Model):
         reconstruction_loss = tf.reduce_mean(
           keras.losses.binary_crossentropy(inputs, reconstruction)
         )
-        reconstruction_loss *= 128 * 128
+        reconstruction_loss *= 64 * 64
         kl_loss = 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
         kl_loss = tf.reduce_mean(kl_loss)
         kl_loss *= -0.5
@@ -78,6 +70,14 @@ class VAE(keras.Model):
         self.add_metric(total_loss, name='total_loss', aggregation='mean')
         self.add_metric(reconstruction_loss, name='reconstruction_loss', aggregation='mean')
         return reconstruction
+
+    @property
+    def metrics(self):
+        return [
+            self.total_loss_tracker,
+            self.reconstruction_loss_tracker,
+            self.kl_loss_tracker,
+        ]
 
 
 
